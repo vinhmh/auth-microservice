@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Buffer } from 'buffer';
-import { pako } from 'pako';
-import { PHPUnserialize } from 'phpunserialize';
-import { atob } from 'atob';
-import { sha1 } from 'sha1';
+import { inflateRaw } from 'pako';
+const phpunserialize = require('phpunserialize');
+const atob = require('atob')
+const sha1 = require('sha1')
 @Injectable()
 export class AuthService {
   decodetoken(ctoken: string, puk: string | any[]): {} {
@@ -15,7 +15,7 @@ export class AuthService {
     for (var i = 0; i < b64.length; i++) {
       sDec.push(b64.charCodeAt(i));
     } //base64 decodeString to byte array (unit8Array)
-    var buf = pako.inflateRaw(sDec); //decompress byte array
+    var buf = inflateRaw(sDec); //decompress byte array
 
     var token = String.fromCharCode.apply(String, buf);
     var sgn = token.slice(token.length - 40);
@@ -25,7 +25,7 @@ export class AuthService {
     if (validate == sgn) {
       let parse_json = new Buffer(arr, 'hex').toString(); // hex to jsonString
       let strJson = parse_json.replace('\u0000', ' ');
-      const object_User = PHPUnserialize(strJson); //json to object
+      const object_User = phpunserialize(strJson); //json to object
       let user = {};
       for (let [key, value] of Object.entries(object_User)) {
         let new_key = key.replace('\x00', '').trim();
